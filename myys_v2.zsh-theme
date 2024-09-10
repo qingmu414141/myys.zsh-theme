@@ -58,7 +58,10 @@ local exit_code="%(?,,C:%{$fg[red]%}%?%{$reset_color%})"
 
 # Detect OS and set ipStr accordingly
 if [[ "$(uname)" == "Linux" ]]; then
-  ipStr=$(ip -o addr | awk -F "inet |/" '!/127.0.0.1/ {print $2}' | sort -n | head -n 1)
+  if [[ "$(grep -o "WSL" /proc/version | head -n 1)" == "WSL" ]]; then   # WSL
+    ipStr=$(ip -o addr show dev eth0 | awk '/inet / {print $4}' | cut -d'/' -f1)
+  elif  # native linux
+    ipStr=$(ip -o addr | awk -F "inet |/" '!/127.0.0.1/ {print $2}' | sort -n | head -n 1)
 elif [[ "$(uname)" == "Darwin" ]]; then  # macOS
   ipStr=$(ifconfig | awk '/inet / && !/127.0.0.1/ {print $2}' | grep '^192\.')
 else
