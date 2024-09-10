@@ -56,7 +56,15 @@ ys_hg_prompt_info() {
 
 local exit_code="%(?,,C:%{$fg[red]%}%?%{$reset_color%})"
 
-ipStr=$(ip -o addr | awk -F "inet |/" '!/127.0.0.1/ {print $2}' | sort -n | head -n 1)
+# Detect OS and set ipStr accordingly
+if [[ "$(uname)" == "Linux" ]]; then
+  ipStr=$(ip -o addr | awk -F "inet |/" '!/127.0.0.1/ {print $2}' | sort -n | head -n 1)
+elif [[ "$(uname)" == "Darwin" ]]; then  # macOS
+  ipStr=$(ifconfig | awk '/inet / && !/127.0.0.1/ {print $2}' | grep '^192\.')
+else
+  ipStr="Unknown OS"
+fi
+
 # Prompt format:
 #
 # PRIVILEGES USER @ MACHINE in DIRECTORY on git:BRANCH STATE [TIME] C:LAST_EXIT_CODE
